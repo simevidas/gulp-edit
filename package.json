@@ -11,13 +11,14 @@
     "modify"
   ],
   "dependencies": {
+    "gulp": "^3.8.10",
+    "gulp-util": "^3.0.1",
     "through2": "~0.4"
   },
   "devDependencies": {
+    "gulp": "^3.8.10",
     "mocha": "*",
-    "should": "*",
-    "gulp": "~3.6.2",
-    "gulp-util": "~2.2"
+    "should": "*"
   },
   "scripts": {
     "test": "mocha"
