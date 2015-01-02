@@ -7,9 +7,9 @@ module.exports = function (modifier) {
 	
 	return through.obj(function (file, enc, next) {
 		
-		function buffer(contents) {
+		function buffer(err, contents) {
 			file.contents = new Buffer(contents);
-			next(null, file);
+			next(err, file);
 
 		}
 	  
@@ -31,7 +31,7 @@ module.exports = function (modifier) {
 			]);
 			
 			if (retVal) {
-				buffer(retVal);
+				buffer(null, retVal);
 			}
 			
 		} catch (err) {
