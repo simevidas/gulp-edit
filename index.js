@@ -30,11 +30,7 @@ module.exports = function gulpEdit(modifier) {
 		}
 		
 		try {
-			var retVal = modifier.apply(file, [
-				file.contents.toString(),
-				file,
-				buffer
-			]);
+			var retVal = modifier(file.contents.toString(), file, buffer);
 			
 			if (retVal) {
 				buffer(null, retVal);
