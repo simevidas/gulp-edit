@@ -1,52 +1,45 @@
-var edit = require('../')
-var should = require('should')
-var path = require('path')
-var File = require('gulp-util').File
-var Buffer = require('buffer').Buffer
-require('mocha')
+'use strict';
 
-describe('gulp-edit', function () {
-  describe('edit()', function () {
-    var input
+var edit = require('../');
+var assert = require('assert');
+var gutil = require('gulp-util');
 
-    input = ['wadup']
-    testFiles(edit(function(src, cb){
-      cb(null, src + '\r\n')
-    }), input, ['wadup\r\n'])
+it('should modify file contents in sync mode', function (callback) {
+	
+	var stream = edit(function modifierSync(contents) {
+		return contents + 'bar';
+	});
 
-    input = ['wadup', 'doe', 'hey']
-    testFiles(edit(function(src, cb){
-      cb(null, src + '\n')
-    }), input, ['wadup\n', 'doe\n', 'hey\n'])
+	stream.once('data', function (file) {
+		assert.equal(file.contents.toString(), 'foobar');
+	});
 
-    function testFiles(stream, contentses, results) {
-      it('should edit one or several files', function (done) {
-        var count = 0
-        stream.on('data', function (newFile) {
-          should.exist(newFile)
-          should.exist(newFile.contents)
+	stream.on('end', callback);
 
-          var newFileIndex = newFile.index
+	stream.write(new gutil.File({
+		path: 'lorem.txt',
+		contents: new Buffer('foo')
+	}));
 
-          String(newFile.contents).should.equal(results[newFileIndex])
-          Buffer.isBuffer(newFile.contents).should.equal(true)
+	stream.end();
+});
 
-          if (++count === contentses.length) done()
-        })
+it('should modify file contents in async mode', function (callback) {
+	
+	var stream = edit(function modifierAsync(contents, file, cb) {
+		cb(null, contents + 'bar');
+	});
 
-        contentses.forEach(function (contents, i) {
-          var file = new File({
-            cwd: '/home/contra/',
-            base: '/home/contra/test',
-            path: '/home/contra/test/file' + i + '.js',
-            contents: new Buffer(contents)
-          })
-          file.index = i
-          stream.write(file)
-        })
+	stream.once('data', function (file) {
+		assert.equal(file.contents.toString(), 'foobar');
+	});
 
-        stream.end()
-      })
-    }
-  })
-})
+	stream.on('end', callback);
+
+	stream.write(new gutil.File({
+		path: 'lorem.txt',
+		contents: new Buffer('foo')
+	}));
+
+	stream.end();
+});
