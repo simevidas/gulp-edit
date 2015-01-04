@@ -1,6 +1,7 @@
 'use strict';
 
 var through = require('through2');
+var once = require('once');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 
@@ -14,7 +15,7 @@ module.exports = function gulpEdit(modifier) {
 	
 	return through.obj(function (file, enc, cb) {
 		
-		function retFn(err, contents) {			
+		var retFn = once(function (err, contents) {			
 			if (err) {
 				cb(new PluginError(PLUGIN_NAME, err, { fileName: file.path }));
 				return;
@@ -22,7 +23,7 @@ module.exports = function gulpEdit(modifier) {
 			
 			file.contents = new Buffer(contents);
 			cb(null, file);
-		}
+		});
 		
 		if (file.isNull()) {
 			cb(null, file);
