@@ -14,9 +14,14 @@ module.exports = function gulpEdit(modifier) {
 	
 	return through.obj(function (file, enc, cb) {
 		
-		function buffer(err, contents) {
+		function retFn(err, contents) {			
+			if (err) {
+				cb(new PluginError(PLUGIN_NAME, err, { fileName: file.path }));
+				return;
+			}
+			
 			file.contents = new Buffer(contents);
-			cb(err, file);
+			cb(null, file);
 		}
 		
 		if (file.isNull()) {
@@ -30,14 +35,14 @@ module.exports = function gulpEdit(modifier) {
 		}
 		
 		try {
-			var retVal = modifier(file.contents.toString(), file, buffer);
+			var retVal = modifier(file.contents.toString(), file, retFn);
 			
-			if (retVal) {
-				buffer(null, retVal);
+			if (retVal != null) {
+				retFn(null, retVal);
 			}
 			
 		} catch (err) {
-			cb(new PluginError(PLUGIN_NAME, err, { fileName: file.path }));
+			retFn(err);
 		}
   });
 };
