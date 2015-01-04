@@ -1,25 +1,31 @@
 'use strict';
 
-var gutil = require('gulp-util');
 var through = require('through2');
+var gutil = require('gulp-util');
+var PluginError = gutil.PluginError;
 
-module.exports = function (modifier) {
+var PLUGIN_NAME = 'gulp-edit';
+
+module.exports = function gulpEdit(modifier) {
 	
-	return through.obj(function (file, enc, next) {
+	if (!modifier) {
+		throw new PluginError(PLUGIN_NAME, 'Missing modifier function.');
+	}
+	
+	return through.obj(function (file, enc, cb) {
 		
 		function buffer(err, contents) {
 			file.contents = new Buffer(contents);
-			next(err, file);
-
+			cb(err, file);
 		}
-	  
-		if (file.isNull() || !modifier) {
-			next(null, file);
+		
+		if (file.isNull()) {
+			cb(null, file);
 			return;
 		}
 
 		if (file.isStream()) {
-			cb(new gutil.PluginError('gulp-edit', 'Streaming not supported'));
+			cb(new PluginError(PLUGIN_NAME, 'Streaming not supported.'));
 			return;
 		}
 		
@@ -35,7 +41,7 @@ module.exports = function (modifier) {
 			}
 			
 		} catch (err) {
-			next(new gutil.PluginError('gulp-edit', err, { fileName: file.path }));
+			cb(new PluginError(PLUGIN_NAME, err, { fileName: file.path }));
 		}
   });
 };
